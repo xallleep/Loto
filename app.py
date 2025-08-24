@@ -12,13 +12,13 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_alterar_em_producao')
 PRECO_PALPITE = 3.99
 CHAVE_PIX = '19668d66-72cb-44cb-b7fc-fe3d1b8c559b'
 
-# Inicializar banco de dados
+# Inicializar banco de dados CORRETAMENTE
 def init_db():
     db_path = os.path.join(os.getcwd(), 'lotofacil.db')
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     
-    # Tabela de pagamentos
+    # Tabela de pagamentos - CORRIGIDA: coluna qrcode_texto existe
     c.execute('''CREATE TABLE IF NOT EXISTS pagamentos
                  (id TEXT PRIMARY KEY, 
                   cliente TEXT,
@@ -26,10 +26,9 @@ def init_db():
                   status TEXT,
                   data_criacao TIMESTAMP,
                   data_confirmacao TIMESTAMP,
-                  qrcode_texto TEXT,
-                  qrcode_imagem TEXT)''')
+                  qrcode_texto TEXT)''')  # CORRETO: coluna existe
     
-    # Tabela de palpites - CORRIGIDA: removida coluna 'pago'
+    # Tabela de palpites
     c.execute('''CREATE TABLE IF NOT EXISTS palpites
                  (id TEXT PRIMARY KEY,
                   pagamento_id TEXT,
@@ -51,7 +50,7 @@ def gerar_numeros_premium():
     """Gera números 'premium' com distribuição otimizada"""
     numeros = []
     
-    # Garantir boa distribuição
+    # Garantir boa distribuição (estratégia para aumentar "sorte")
     numeros.extend(random.sample(range(1, 9), 4))      # Baixos: 1-8
     numeros.extend(random.sample(range(9, 17), 5))     # Médios: 9-16  
     numeros.extend(random.sample(range(17, 26), 6))    # Altos: 17-25
@@ -116,7 +115,7 @@ def iniciar_pagamento():
         # Simular dados do PIX
         qrcode_data = f"00020126580014br.gov.bcb.pix0134{CHAVE_PIX}5204000053039865404{PRECO_PALPITE:.2f}5802BR5925PALPITEIRO PREMIUM LTDA6008BRASILIA62290525{random.randint(10000, 99999)}6304"
         
-        # Salvar no banco de dados
+        # Salvar no banco de dados - CORRETO: apenas colunas existentes
         conn = sqlite3.connect(os.path.join(os.getcwd(), 'lotofacil.db'))
         c = conn.cursor()
         
@@ -134,7 +133,6 @@ def iniciar_pagamento():
             'pagamento_id': pagamento_id,
             'valor': PRECO_PALPITE,
             'qrcode_texto': qrcode_data,
-            'qrcode_imagem': '',
             'chave_pix': CHAVE_PIX
         })
     except Exception as e:

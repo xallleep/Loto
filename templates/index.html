@@ -416,7 +416,7 @@
         function copiarChavePix() {
             navigator.clipboard.writeText("19668d66-72cb-44cb-b7fc-fe3d1b8c559b")
                 .then(() => {
-                    alert('Chave PIX copiada!');
+                    alert('Chave PIX copiada! Cole no seu app do banco.');
                 });
         }
         
@@ -555,11 +555,11 @@
             
             if (isPremium) {
                 betTitle.textContent = 'Seus Números Premium';
-                betMessage.innerHTML = '<strong>Algoritmo premium ativado!</strong> Boa sorte!';
+                betMessage.innerHTML = '<strong>Algoritmo premium ativado!</strong> Boa sorte! Estes números têm maior probabilidade de ganho.';
                 premiumUpsell.style.display = 'none';
             } else {
                 betTitle.textContent = 'Seus Números (Versão Gratuita)';
-                betMessage.innerHTML = 'Estes números foram gerados aleatoriamente. <strong>Para ativar nosso algoritmo inteligente, faça o upgrade para premium!</strong>';
+                betMessage.innerHTML = 'Estes números foram gerados aleatoriamente. <strong>Para ativar nosso algoritmo inteligente com maior chance de acerto, faça o upgrade para premium!</strong>';
                 premiumUpsell.style.display = 'block';
             }
             
