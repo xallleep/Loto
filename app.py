@@ -186,6 +186,8 @@ def health_check():
 def catch_all(path):
     return render_template('index.html', preco=PRECO_PALPITE)
 
+# ... (o resto do código permanece igual)
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
