@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session
-from flask_cors import CORS  # Importar CORS
+from flask_cors import CORS
 import random
 import sqlite3
 import uuid
@@ -16,12 +16,17 @@ CORS(app, supports_credentials=True)
 PRECO_PALPITE = 3.99
 CHAVE_PIX = '19668d66-72cb-44cb-b7fc-fe3d1b8c559b'
 
-# Função para inicializar o banco de dados
+# Função para inicializar o banco de dados CORRIGIDA
 def init_db():
     try:
         db_path = os.path.join(os.getcwd(), 'lotofacil.db')
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
+        
+        # Verificar se a tabela palpites existe e tem a coluna premium
+        c.execute("PRAGMA table_info(palpites)")
+        columns = c.fetchall()
+        column_names = [column[1] for column in columns]
         
         # Criar tabela de pagamentos
         c.execute('''CREATE TABLE IF NOT EXISTS pagamentos
@@ -31,13 +36,21 @@ def init_db():
                       data_criacao TIMESTAMP,
                       data_confirmacao TIMESTAMP)''')
         
-        # Criar tabela de palpites
+        # Criar tabela de palpites se não existir
         c.execute('''CREATE TABLE IF NOT EXISTS palpites
                      (id TEXT PRIMARY KEY,
                       pagamento_id TEXT,
                       numeros TEXT,
-                      data_criacao TIMESTAMP,
-                      premium BOOLEAN DEFAULT FALSE)''')
+                      data_criacao TIMESTAMP)''')
+        
+        # Se a tabela existir mas não tiver a coluna premium, adicionar
+        if 'palpites' in [table[0] for table in c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]:
+            if 'premium' not in column_names:
+                try:
+                    c.execute("ALTER TABLE palpites ADD COLUMN premium BOOLEAN DEFAULT FALSE")
+                    print("Coluna 'premium' adicionada à tabela palpites")
+                except sqlite3.OperationalError:
+                    print("Coluna 'premium' já existe ou não pôde ser adicionada")
         
         conn.commit()
         conn.close()
@@ -121,10 +134,21 @@ def gerar_palpite_premium():
         numeros_str = ','.join(str(n) for n in numeros_premium)
         print(f"Números premium gerados: {numeros_premium}")
         
-        # Criar palpite premium
+        # Criar palpite premium - VERIFICAR se a coluna premium existe
         palpite_id = str(uuid.uuid4())
-        c.execute("INSERT INTO palpites (id, pagamento_id, numeros, data_criacao, premium) VALUES (?, ?, ?, ?, ?)",
-                 (palpite_id, transacao_id, numeros_str, datetime.now(), True))
+        
+        # Verificar se a coluna premium existe
+        c.execute("PRAGMA table_info(palpites)")
+        columns = c.fetchall()
+        column_names = [column[1] for column in columns]
+        
+        if 'premium' in column_names:
+            c.execute("INSERT INTO palpites (id, pagamento_id, numeros, data_criacao, premium) VALUES (?, ?, ?, ?, ?)",
+                     (palpite_id, transacao_id, numeros_str, datetime.now(), True))
+        else:
+            # Se a coluna não existir, inserir sem ela
+            c.execute("INSERT INTO palpites (id, pagamento_id, numeros, data_criacao) VALUES (?, ?, ?, ?)",
+                     (palpite_id, transacao_id, numeros_str, datetime.now()))
         
         conn.commit()
         conn.close()
