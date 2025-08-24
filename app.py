@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session
+from flask_cors import CORS  # Importar CORS
 import random
 import sqlite3
 import uuid
@@ -7,6 +8,9 @@ import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_secreta_alterar_em_producao')
+
+# Configurar CORS para permitir todas as origens
+CORS(app, supports_credentials=True)
 
 # Configurações
 PRECO_PALPITE = 3.99

@@ -6,6 +6,7 @@
     <title>Palpiteiro Premium - Lotofácil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* (O CSS permanece igual) */
         :root {
             --primary: #0066cc;
             --secondary: #009900;
@@ -311,7 +312,7 @@
             
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
                 <h3 style="color: white; margin: 10px 0;">Apenas <span style="font-size: 1.5em;">R$ 3.99</span> por palpite!</h3>
-                <p>Menos que um cafezinho para aumentar drasticamente suas chances!</p>
+                <p>Menos que um cafezinho para aumentar drasticallyamente suas chances!</p>
             </div>
             
             <a href="#generator" class="btn">Gerar Palpites Premium</a>
@@ -445,10 +446,14 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                credentials: 'include'  // Importante para cookies/sessão
             })
             .then(response => {
-                console.log("Resposta recebida do servidor");
+                console.log("Resposta recebida do servidor:", response.status);
+                if (!response.ok) {
+                    throw new Error('Erro HTTP: ' + response.status);
+                }
                 return response.json();
             })
             .then(data => {
@@ -466,7 +471,7 @@
             })
             .catch(error => {
                 console.error('Erro completo:', error);
-                alert('Erro de conexão. Tente novamente.');
+                alert('Erro de conexão. Verifique o console (F12) para detalhes.');
                 paymentProcessing.style.display = 'none';
                 restrictedContent.style.display = 'block';
                 solicitarBtn.disabled = false;
@@ -482,12 +487,13 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                credentials: 'include'  // Importante para cookies/sessão
             })
             .then(response => {
                 console.log("Resposta recebida:", response.status);
                 if (!response.ok) {
-                    throw new Error('Erro na resposta do servidor: ' + response.status);
+                    throw new Error('Erro HTTP: ' + response.status);
                 }
                 return response.json();
             })
@@ -507,7 +513,7 @@
             })
             .catch(error => {
                 console.error('Erro completo:', error);
-                alert('Erro de conexão. Tente novamente. Detalhes no console (F12).');
+                alert('Erro de conexão. Verifique o console (F12) para detalhes.');
                 paymentProcessing.style.display = 'none';
                 pixPayment.style.display = 'block';
             });
@@ -526,7 +532,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                credentials: 'include'
             })
             .then(response => response.json())
             .then(data => {
