@@ -6,40 +6,55 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_alterar_em_producao')
+app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_secreta_alterar_em_producao')
 
 # Configurações
 PRECO_PALPITE = 3.99
 CHAVE_PIX = '19668d66-72cb-44cb-b7fc-fe3d1b8c559b'
 
-# Inicializar banco de dados CORRETAMENTE
+# Função para inicializar o banco de dados CORRETAMENTE
 def init_db():
-    db_path = os.path.join(os.getcwd(), 'lotofacil.db')
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    
-    # Tabela de pagamentos - CORRIGIDA: coluna qrcode_texto existe
-    c.execute('''CREATE TABLE IF NOT EXISTS pagamentos
-                 (id TEXT PRIMARY KEY, 
-                  cliente TEXT,
-                  valor REAL,
-                  status TEXT,
-                  data_criacao TIMESTAMP,
-                  data_confirmacao TIMESTAMP,
-                  qrcode_texto TEXT)''')  # CORRETO: coluna existe
-    
-    # Tabela de palpites
-    c.execute('''CREATE TABLE IF NOT EXISTS palpites
-                 (id TEXT PRIMARY KEY,
-                  pagamento_id TEXT,
-                  numeros TEXT,
-                  data_criacao TIMESTAMP,
-                  FOREIGN KEY (pagamento_id) REFERENCES pagamentos (id))''')
-    
-    conn.commit()
-    conn.close()
+    try:
+        db_path = os.path.join(os.getcwd(), 'lotofacil.db')
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        
+        # Verificar se as tabelas já existem
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='pagamentos'")
+        tabela_pagamentos_existe = c.fetchone()
+        
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='palpites'")
+        tabela_palpites_existe = c.fetchone()
+        
+        # Criar tabela de pagamentos se não existir
+        if not tabela_pagamentos_existe:
+            c.execute('''CREATE TABLE pagamentos
+                         (id TEXT PRIMARY KEY, 
+                          cliente TEXT,
+                          valor REAL,
+                          status TEXT,
+                          data_criacao TIMESTAMP,
+                          data_confirmacao TIMESTAMP,
+                          qrcode_texto TEXT)''')
+            print("Tabela 'pagamentos' criada com sucesso!")
+        
+        # Criar tabela de palpites se não existir
+        if not tabela_palpites_existe:
+            c.execute('''CREATE TABLE palpites
+                         (id TEXT PRIMARY KEY,
+                          pagamento_id TEXT,
+                          numeros TEXT,
+                          data_criacao TIMESTAMP,
+                          FOREIGN KEY (pagamento_id) REFERENCES pagamentos (id))''')
+            print("Tabela 'palpites' criada com sucesso!")
+        
+        conn.commit()
+        conn.close()
+        
+    except Exception as e:
+        print(f"Erro ao inicializar banco de dados: {e}")
 
-# Verificar e inicializar banco
+# Inicializar o banco ao iniciar
 init_db()
 
 def gerar_numeros_aleatorios():
@@ -50,7 +65,7 @@ def gerar_numeros_premium():
     """Gera números 'premium' com distribuição otimizada"""
     numeros = []
     
-    # Garantir boa distribuição (estratégia para aumentar "sorte")
+    # Estratégia de distribuição para aumentar "chances"
     numeros.extend(random.sample(range(1, 9), 4))      # Baixos: 1-8
     numeros.extend(random.sample(range(9, 17), 5))     # Médios: 9-16  
     numeros.extend(random.sample(range(17, 26), 6))    # Altos: 17-25
@@ -104,7 +119,8 @@ def gerar_palpite():
         return jsonify({'status': 'success', 'numeros': numeros, 'pago': False})
         
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        print(f"Erro em gerar-palpite: {e}")
+        return jsonify({'status': 'error', 'message': 'Erro interno do servidor'}), 500
 
 @app.route('/iniciar-pagamento', methods=['POST'])
 def iniciar_pagamento():
@@ -115,7 +131,7 @@ def iniciar_pagamento():
         # Simular dados do PIX
         qrcode_data = f"00020126580014br.gov.bcb.pix0134{CHAVE_PIX}5204000053039865404{PRECO_PALPITE:.2f}5802BR5925PALPITEIRO PREMIUM LTDA6008BRASILIA62290525{random.randint(10000, 99999)}6304"
         
-        # Salvar no banco de dados - CORRETO: apenas colunas existentes
+        # Salvar no banco de dados - CORRETO
         conn = sqlite3.connect(os.path.join(os.getcwd(), 'lotofacil.db'))
         c = conn.cursor()
         
@@ -136,7 +152,8 @@ def iniciar_pagamento():
             'chave_pix': CHAVE_PIX
         })
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        print(f"Erro em iniciar-pagamento: {e}")
+        return jsonify({'status': 'error', 'message': 'Erro ao processar pagamento'}), 500
 
 @app.route('/confirmar-pagamento', methods=['POST'])
 def confirmar_pagamento():
@@ -147,9 +164,18 @@ def confirmar_pagamento():
         if not pagamento_id or not palpite_id:
             return jsonify({'status': 'error', 'message': 'IDs necessários não fornecidos'})
         
-        # Atualizar status do pagamento
         conn = sqlite3.connect(os.path.join(os.getcwd(), 'lotofacil.db'))
         c = conn.cursor()
+        
+        # Verificar se o pagamento existe
+        c.execute("SELECT status FROM pagamentos WHERE id = ?", (pagamento_id,))
+        pagamento = c.fetchone()
+        
+        if not pagamento:
+            conn.close()
+            return jsonify({'status': 'error', 'message': 'Pagamento não encontrado'})
+        
+        # Atualizar status do pagamento
         c.execute("UPDATE pagamentos SET status = 'confirmado', data_confirmacao = ? WHERE id = ?",
                  (datetime.now(), pagamento_id))
         
@@ -171,12 +197,17 @@ def confirmar_pagamento():
         return jsonify({'status': 'success', 'numeros': numeros_premium, 'pago': True})
         
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        print(f"Erro em confirmar-pagamento: {e}")
+        return jsonify({'status': 'error', 'message': 'Erro ao confirmar pagamento'}), 500
 
 @app.route('/limpar-sessao', methods=['POST'])
 def limpar_sessao():
-    session.clear()
-    return jsonify({'status': 'success'})
+    try:
+        session.clear()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        print(f"Erro em limpar-sessao: {e}")
+        return jsonify({'status': 'error', 'message': 'Erro ao limpar sessão'}), 500
 
 @app.route('/health')
 def health_check():
@@ -185,8 +216,6 @@ def health_check():
 @app.route('/<path:path>')
 def catch_all(path):
     return render_template('index.html', preco=PRECO_PALPITE)
-
-# ... (o resto do código permanece igual)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
