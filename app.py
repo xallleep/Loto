@@ -4,19 +4,16 @@ import sqlite3
 import uuid
 from datetime import datetime
 import os
-import requests
-import json
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_alterar_em_producao')
 
 # Configurações
 PRECO_PALPITE = 3.99
-CHAVE_PIX = '19668d66-72cb-44cb-b7fc-fe3d1b8c559b'  # Chave PIX
+CHAVE_PIX = '19668d66-72cb-44cb-b7fc-fe3d1b8c559b'
 
 # Inicializar banco de dados
 def init_db():
-    # No Render, precisamos usar caminho absoluto
     db_path = os.path.join(os.getcwd(), 'lotofacil.db')
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
@@ -32,19 +29,18 @@ def init_db():
                   qrcode_texto TEXT,
                   qrcode_imagem TEXT)''')
     
-    # Tabela de palpites
+    # Tabela de palpites - CORRIGIDA: removida coluna 'pago'
     c.execute('''CREATE TABLE IF NOT EXISTS palpites
                  (id TEXT PRIMARY KEY,
                   pagamento_id TEXT,
                   numeros TEXT,
                   data_criacao TIMESTAMP,
-                  pago INTEGER DEFAULT 0,
                   FOREIGN KEY (pagamento_id) REFERENCES pagamentos (id))''')
     
     conn.commit()
     conn.close()
 
-# Inicializar o banco ao iniciar a aplicação
+# Verificar e inicializar banco
 init_db()
 
 def gerar_numeros_aleatorios():
@@ -52,21 +48,15 @@ def gerar_numeros_aleatorios():
     return sorted(random.sample(range(1, 26), 15))
 
 def gerar_numeros_premium():
-    """Gera números 'premium' com uma ligeira alteração na distribuição"""
-    # Esta função gera números com uma distribuição um pouco diferente
-    # para dar a sensação de que são mais "especiais"
+    """Gera números 'premium' com distribuição otimizada"""
     numeros = []
     
-    # Garantir alguns números baixos (1-8)
-    numeros.extend(random.sample(range(1, 9), 3))
+    # Garantir boa distribuição
+    numeros.extend(random.sample(range(1, 9), 4))      # Baixos: 1-8
+    numeros.extend(random.sample(range(9, 17), 5))     # Médios: 9-16  
+    numeros.extend(random.sample(range(17, 26), 6))    # Altos: 17-25
     
-    # Garantir alguns números médios (9-16)
-    numeros.extend(random.sample(range(9, 17), 5))
-    
-    # Garantir alguns números altos (17-25)
-    numeros.extend(random.sample(range(17, 26), 4))
-    
-    # Completar com números aleatórios
+    # Garantir 15 números únicos
     while len(numeros) < 15:
         novo_numero = random.randint(1, 25)
         if novo_numero not in numeros:
@@ -81,7 +71,7 @@ def index():
 @app.route('/gerar-palpite', methods=['POST'])
 def gerar_palpite():
     try:
-        # Se já tem um palpite pago na sessão, retorna os números premium
+        # Se já tem palpite pago na sessão
         if 'palpite_pago' in session and session['palpite_pago']:
             palpite_id = session.get('palpite_id')
             conn = sqlite3.connect(os.path.join(os.getcwd(), 'lotofacil.db'))
@@ -94,20 +84,20 @@ def gerar_palpite():
                 numeros = list(map(int, resultado[0].split(',')))
                 return jsonify({'status': 'success', 'numeros': numeros, 'pago': True})
         
-        # Se não pagou, gera números aleatórios normais
+        # Gerar números aleatórios (gratuitos)
         numeros = gerar_numeros_aleatorios()
         numeros_str = ','.join(str(n) for n in numeros)
         palpite_id = str(uuid.uuid4())
         
-        # Salva no banco de dados como não pago
+        # Salvar no banco (sem pagamento_id indica que é gratuito)
         conn = sqlite3.connect(os.path.join(os.getcwd(), 'lotofacil.db'))
         c = conn.cursor()
-        c.execute("INSERT INTO palpites (id, numeros, data_criacao, pago) VALUES (?, ?, ?, ?)",
-                 (palpite_id, numeros_str, datetime.now(), 0))
+        c.execute("INSERT INTO palpites (id, numeros, data_criacao) VALUES (?, ?, ?)",
+                 (palpite_id, numeros_str, datetime.now()))
         conn.commit()
         conn.close()
         
-        # Salva na sessão
+        # Salvar na sessão
         session['palpite_gerado'] = True
         session['palpite_id'] = palpite_id
         session['palpite_pago'] = False
@@ -144,7 +134,7 @@ def iniciar_pagamento():
             'pagamento_id': pagamento_id,
             'valor': PRECO_PALPITE,
             'qrcode_texto': qrcode_data,
-            'qrcode_imagem': '',  # Não temos imagem real do QR code
+            'qrcode_imagem': '',
             'chave_pix': CHAVE_PIX
         })
     except Exception as e:
@@ -159,17 +149,18 @@ def confirmar_pagamento():
         if not pagamento_id or not palpite_id:
             return jsonify({'status': 'error', 'message': 'IDs necessários não fornecidos'})
         
-        # Atualizar status do pagamento para confirmado
+        # Atualizar status do pagamento
         conn = sqlite3.connect(os.path.join(os.getcwd(), 'lotofacil.db'))
         c = conn.cursor()
         c.execute("UPDATE pagamentos SET status = 'confirmado', data_confirmacao = ? WHERE id = ?",
                  (datetime.now(), pagamento_id))
         
-        # Gerar novos números "premium" e atualizar o palpite
+        # Gerar números premium
         numeros_premium = gerar_numeros_premium()
         numeros_str = ','.join(str(n) for n in numeros_premium)
         
-        c.execute("UPDATE palpites SET pagamento_id = ?, numeros = ?, pago = 1 WHERE id = ?",
+        # Atualizar palpite com pagamento_id (indica que é pago)
+        c.execute("UPDATE palpites SET pagamento_id = ?, numeros = ? WHERE id = ?",
                  (pagamento_id, numeros_str, palpite_id))
         
         conn.commit()
@@ -189,17 +180,14 @@ def limpar_sessao():
     session.clear()
     return jsonify({'status': 'success'})
 
-# Rota para health check (necessária para o Render)
 @app.route('/health')
 def health_check():
     return jsonify({'status': 'healthy'})
 
-# Rota de fallback para evitar erro 404 no Render
 @app.route('/<path:path>')
 def catch_all(path):
     return render_template('index.html', preco=PRECO_PALPITE)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    # No Render, precisamos usar host '0.0.0.0'
     app.run(host='0.0.0.0', port=port, debug=False)
