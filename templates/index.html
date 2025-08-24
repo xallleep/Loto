@@ -248,6 +248,15 @@
             color: #856404;
         }
 
+        .warning-alert {
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+
         .loading-spinner {
             border: 5px solid #f3f3f3;
             border-top: 5px solid var(--accent);
@@ -305,7 +314,7 @@
                 <p>Menos que um cafezinho para aumentar drasticamente suas chances!</p>
             </div>
             
-            <a href="#generator" class="btn">Gerar Palpites Agora</a>
+            <a href="#generator" class="btn">Gerar Palpites Premium</a>
         </div>
     </section>
 
@@ -315,31 +324,33 @@
             <div class="step">
                 <div class="step-number">1</div>
                 <h3>Faça o Pagamento</h3>
-                <p>Pague apenas R$ 3.99 por palpite via PIX.</p>
+                <p>Pague apenas R$ 3.99 via PIX para ativar o algoritmo premium.</p>
             </div>
             <div class="step">
                 <div class="step-number">2</div>
                 <h3>Gere seu Palpite</h3>
-                <p>Utilize nosso algoritmo avançado para gerar combinações com maior probabilidade.</p>
+                <p>Clique em "Já Paguei" para receber seus números com maior probabilidade.</p>
             </div>
             <div class="step">
                 <div class="step-number">3</div>
                 <h3>Aumente suas Chances</h3>
-                <p>Jogue com mais confiança e acompanhe seus resultados.</p>
+                <p>Jogue com confiança usando nosso algoritmo inteligente.</p>
             </div>
         </div>
     </section>
 
     <section class="container" id="generator">
-        <h2 class="section-title">Gerador de Palpites</h2>
+        <h2 class="section-title">Gerador de Palpites Premium</h2>
         <div class="generator-container">
-            <p>Clique no botão abaixo para gerar seu palpite. <strong>Para ativar o algoritmo premium e aumentar suas chances, faça o pagamento de R$ 3.99 via PIX.</strong></p>
-            <button class="btn" id="generate-button">Gerar Meu Palpite</button>
+            <p><strong>Para gerar seus números da sorte, faça o pagamento de R$ 3.99 via PIX.</strong></p>
+            <p>Nosso algoritmo premium analisa estatísticas e padrões para aumentar suas chances de ganhar!</p>
+            
+            <button class="btn" id="solicitar-pagamento">Pagar com PIX e Gerar Palpite</button>
             
             <div id="restricted-content">
                 <div class="payment-instructions">
-                    <p><strong>ATENÇÃO:</strong> Os palpites gratuitos são gerados aleatoriamente e não utilizam nosso algoritmo inteligente.</p>
-                    <p>Para aumentar significativamente suas chances, realize o pagamento e ative o modo premium!</p>
+                    <p><strong>⚠️ ATENÇÃO:</strong> Sem o pagamento, os números não são gerados pelo algoritmo inteligente e não têm a mesma eficácia.</p>
+                    <p>O valor de R$ 3.99 é necessário para ativar nosso sistema de análise preditiva.</p>
                 </div>
             </div>
             
@@ -349,17 +360,22 @@
             </div>
             
             <div id="pix-payment" style="display: none;">
-                <h3>Ative o Algoritmo Premium</h3>
-                <p>Pague <strong>R$ 3.99</strong> via PIX para liberar nosso algoritmo inteligente:</p>
+                <h3>Pagamento via PIX</h3>
+                <p>Faça o PIX de <strong>R$ 3.99</strong> para a chave abaixo:</p>
                 
                 <div class="pix-info">
                     <div class="pix-key">
-                        <h4>Chave PIX:</h4>
-                        <p>19668d66-72cb-44cb-b7fc-fe3d1b8c559b</p>
-                        <button class="btn-copy" onclick="copiarChavePix()"><i class="fas fa-copy"></i> Copiar Chave</button>
+                        <h4>Chave PIX (Copie e Cole):</h4>
+                        <p style="font-size: 16px; font-weight: bold;">19668d66-72cb-44cb-b7fc-fe3d1b8c559b</p>
+                        <button class="btn-copy" onclick="copiarChavePix()">
+                            <i class="fas fa-copy"></i> Copiar Chave PIX
+                        </button>
                     </div>
                     
-                    <p>Após o pagamento, clique em "Já Paguei" para ativar o algoritmo premium.</p>
+                    <div class="warning-alert">
+                        <p><strong>IMPORTANTE:</strong> Após fazer o PIX, clique em "Já Paguei" para gerar seus números.</p>
+                        <p>Se não fizer o pagamento real, os números não serão gerados pelo algoritmo premium.</p>
+                    </div>
                 </div>
                 
                 <div class="payment-buttons">
@@ -369,14 +385,15 @@
             </div>
             
             <div id="bet-result" style="display: none;">
-                <h3 id="bet-title">Seus Números da Sorte</h3>
+                <h3 id="bet-title">Seus Números Premium</h3>
                 <div class="numbers" id="generated-numbers"></div>
                 <p id="bet-message"></p>
-                <div id="premium-upsell" style="display: none;">
-                    <p><strong>Quer aumentar ainda mais suas chances?</strong></p>
-                    <p>Ative nosso algoritmo premium por apenas R$ 3.99!</p>
-                    <button class="btn btn-small" id="upgrade-button">Ativar Algoritmo Premium</button>
+                
+                <div class="warning-alert">
+                    <p><strong>LEMBRE-SE:</strong> Estes números só funcionam se o pagamento for realizado.</p>
+                    <p>O algoritmo premium é ativado mediante confirmação do PIX.</p>
                 </div>
+                
                 <button class="btn btn-small" id="new-bet-button">Gerar Novo Palpite</button>
             </div>
         </div>
@@ -388,7 +405,7 @@
 
     <script>
         // Elementos DOM
-        const generateButton = document.getElementById('generate-button');
+        const solicitarBtn = document.getElementById('solicitar-pagamento');
         const betResult = document.getElementById('bet-result');
         const generatedNumbers = document.getElementById('generated-numbers');
         const notification = document.getElementById('notification');
@@ -398,72 +415,28 @@
         const newBetButton = document.getElementById('new-bet-button');
         const confirmPaymentButton = document.getElementById('confirm-payment');
         const cancelPaymentButton = document.getElementById('cancel-payment');
-        const upgradeButton = document.getElementById('upgrade-button');
         const betTitle = document.getElementById('bet-title');
         const betMessage = document.getElementById('bet-message');
-        const premiumUpsell = document.getElementById('premium-upsell');
         
         // Event Listeners
-        generateButton.addEventListener('click', gerarPalpite);
-        confirmPaymentButton.addEventListener('click', confirmarPagamento);
-        cancelPaymentButton.addEventListener('click', () => {
-            pixPayment.style.display = 'none';
-            restrictedContent.style.display = 'block';
-        });
-        upgradeButton.addEventListener('click', iniciarPagamento);
+        solicitarBtn.addEventListener('click', solicitarPagamento);
+        confirmPaymentButton.addEventListener('click', gerarPalpitePremium);
+        cancelPaymentButton.addEventListener('click', cancelarPagamento);
         newBetButton.addEventListener('click', limparSessao);
         
         function copiarChavePix() {
             navigator.clipboard.writeText("19668d66-72cb-44cb-b7fc-fe3d1b8c559b")
                 .then(() => {
-                    alert('Chave PIX copiada! Cole no seu app do banco.');
+                    alert('Chave PIX copiada! Cole no seu app do banco para fazer o pagamento.');
                 });
         }
         
-        function gerarPalpite() {
+        function solicitarPagamento() {
             paymentProcessing.style.display = 'block';
             restrictedContent.style.display = 'none';
-            generateButton.disabled = true;
+            solicitarBtn.disabled = true;
             
-            fetch('/gerar-palpite', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                paymentProcessing.style.display = 'none';
-                
-                if (data.status === 'success') {
-                    displayNumbers(data.numeros, data.pago);
-                    
-                    if (!data.pago) {
-                        premiumUpsell.style.display = 'block';
-                    } else {
-                        premiumUpsell.style.display = 'none';
-                        showNotification();
-                    }
-                } else {
-                    alert('Erro: ' + (data.message || 'Tente novamente.'));
-                    restrictedContent.style.display = 'block';
-                    generateButton.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro de conexão. Tente novamente.');
-                paymentProcessing.style.display = 'none';
-                restrictedContent.style.display = 'block';
-                generateButton.disabled = false;
-            });
-        }
-        
-        function iniciarPagamento() {
-            paymentProcessing.style.display = 'block';
-            premiumUpsell.style.display = 'none';
-            
-            fetch('/iniciar-pagamento', {
+            fetch('/solicitar-pagamento', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -477,34 +450,35 @@
                     pixPayment.style.display = 'block';
                 } else {
                     alert('Erro: ' + (data.message || 'Tente novamente.'));
-                    premiumUpsell.style.display = 'block';
+                    restrictedContent.style.display = 'block';
+                    solicitarBtn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Erro:', error);
                 alert('Erro de conexão. Tente novamente.');
                 paymentProcessing.style.display = 'none';
-                premiumUpsell.style.display = 'block';
+                restrictedContent.style.display = 'block';
+                solicitarBtn.disabled = false;
             });
         }
         
-        function confirmarPagamento() {
+        function gerarPalpitePremium() {
             paymentProcessing.style.display = 'block';
             pixPayment.style.display = 'none';
             
-            fetch('/confirmar-pagamento', {
+            fetch('/gerar-palpite-premium', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ pagamento_id: 'pix_' + Date.now() })
+                }
             })
             .then(response => response.json())
             .then(data => {
                 paymentProcessing.style.display = 'none';
                 
                 if (data.status === 'success') {
-                    displayNumbers(data.numeros, data.pago);
+                    displayNumbers(data.numeros, true);
                     showNotification();
                 } else {
                     alert('Erro: ' + (data.message || 'Tente novamente.'));
@@ -519,6 +493,12 @@
             });
         }
         
+        function cancelarPagamento() {
+            pixPayment.style.display = 'none';
+            restrictedContent.style.display = 'block';
+            solicitarBtn.disabled = false;
+        }
+        
         function limparSessao() {
             fetch('/limpar-sessao', {
                 method: 'POST',
@@ -529,7 +509,7 @@
             .then(() => {
                 betResult.style.display = 'none';
                 restrictedContent.style.display = 'block';
-                generateButton.disabled = false;
+                solicitarBtn.disabled = false;
             });
         }
         
@@ -545,23 +525,13 @@
             
             numbers.forEach(num => {
                 const numberElement = document.createElement('div');
-                numberElement.classList.add('number');
-                if (isPremium) {
-                    numberElement.classList.add('premium-number');
-                }
+                numberElement.classList.add('number', 'premium-number');
                 numberElement.textContent = num;
                 generatedNumbers.appendChild(numberElement);
             });
             
-            if (isPremium) {
-                betTitle.textContent = 'Seus Números Premium';
-                betMessage.innerHTML = '<strong>Algoritmo premium ativado!</strong> Boa sorte! Estes números têm maior probabilidade de ganho.';
-                premiumUpsell.style.display = 'none';
-            } else {
-                betTitle.textContent = 'Seus Números (Versão Gratuita)';
-                betMessage.innerHTML = 'Estes números foram gerados aleatoriamente. <strong>Para ativar nosso algoritmo inteligente com maior chance de acerto, faça o upgrade para premium!</strong>';
-                premiumUpsell.style.display = 'block';
-            }
+            betTitle.textContent = 'Seus Números Premium';
+            betMessage.innerHTML = '<strong>Algoritmo premium ativado com sucesso!</strong> Estes números foram gerados pelo nosso sistema inteligente com base em análise estatística. Boa sorte!';
             
             betResult.style.display = 'block';
             restrictedContent.style.display = 'none';
