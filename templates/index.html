@@ -428,10 +428,15 @@
             navigator.clipboard.writeText("19668d66-72cb-44cb-b7fc-fe3d1b8c559b")
                 .then(() => {
                     alert('Chave PIX copiada! Cole no seu app do banco para fazer o pagamento.');
+                })
+                .catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    alert('Não foi possível copiar a chave. Tente novamente.');
                 });
         }
         
         function solicitarPagamento() {
+            console.log("Solicitando pagamento...");
             paymentProcessing.style.display = 'block';
             restrictedContent.style.display = 'none';
             solicitarBtn.disabled = true;
@@ -442,12 +447,17 @@
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log("Resposta recebida do servidor");
+                return response.json();
+            })
             .then(data => {
+                console.log("Dados recebidos:", data);
                 paymentProcessing.style.display = 'none';
                 
                 if (data.status === 'success') {
                     pixPayment.style.display = 'block';
+                    console.log("Pagamento solicitado com sucesso");
                 } else {
                     alert('Erro: ' + (data.message || 'Tente novamente.'));
                     restrictedContent.style.display = 'block';
@@ -455,7 +465,7 @@
                 }
             })
             .catch(error => {
-                console.error('Erro:', error);
+                console.error('Erro completo:', error);
                 alert('Erro de conexão. Tente novamente.');
                 paymentProcessing.style.display = 'none';
                 restrictedContent.style.display = 'block';
@@ -464,6 +474,7 @@
         }
         
         function gerarPalpitePremium() {
+            console.log("Iniciando geração de palpite premium...");
             paymentProcessing.style.display = 'block';
             pixPayment.style.display = 'none';
             
@@ -473,40 +484,59 @@
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log("Resposta recebida:", response.status);
+                if (!response.ok) {
+                    throw new Error('Erro na resposta do servidor: ' + response.status);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log("Dados recebidos:", data);
                 paymentProcessing.style.display = 'none';
                 
                 if (data.status === 'success') {
                     displayNumbers(data.numeros, true);
                     showNotification();
+                    console.log("Palpite premium gerado com sucesso!");
                 } else {
                     alert('Erro: ' + (data.message || 'Tente novamente.'));
                     pixPayment.style.display = 'block';
+                    console.error("Erro do servidor:", data.message);
                 }
             })
             .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro de conexão. Tente novamente.');
+                console.error('Erro completo:', error);
+                alert('Erro de conexão. Tente novamente. Detalhes no console (F12).');
                 paymentProcessing.style.display = 'none';
                 pixPayment.style.display = 'block';
             });
         }
         
         function cancelarPagamento() {
+            console.log("Pagamento cancelado");
             pixPayment.style.display = 'none';
             restrictedContent.style.display = 'block';
             solicitarBtn.disabled = false;
         }
         
         function limparSessao() {
+            console.log("Limpando sessão...");
             fetch('/limpar-sessao', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             })
-            .then(() => {
+            .then(response => response.json())
+            .then(data => {
+                console.log("Sessão limpa:", data);
+                betResult.style.display = 'none';
+                restrictedContent.style.display = 'block';
+                solicitarBtn.disabled = false;
+            })
+            .catch(error => {
+                console.error('Erro ao limpar sessão:', error);
                 betResult.style.display = 'none';
                 restrictedContent.style.display = 'block';
                 solicitarBtn.disabled = false;

@@ -37,6 +37,7 @@ def init_db():
         
         conn.commit()
         conn.close()
+        print("Banco de dados inicializado com sucesso!")
         
     except Exception as e:
         print(f"Erro ao inicializar banco de dados: {e}")
@@ -90,13 +91,17 @@ def solicitar_pagamento():
 @app.route('/gerar-palpite-premium', methods=['POST'])
 def gerar_palpite_premium():
     try:
+        print("Recebida solicitação para gerar palpite premium")
+        
         # Verificar se há uma transação em andamento
         if not session.get('aguardando_pagamento'):
+            print("Erro: Não há transação em andamento")
             return jsonify({'status': 'error', 'message': 'Solicite o pagamento primeiro'})
         
         transacao_id = session.get('transacao_id')
         
         if not transacao_id:
+            print("Erro: Transação ID não encontrado na sessão")
             return jsonify({'status': 'error', 'message': 'Sessão inválida'})
         
         conn = sqlite3.connect(os.path.join(os.getcwd(), 'lotofacil.db'))
@@ -105,10 +110,12 @@ def gerar_palpite_premium():
         # Registrar o pagamento
         c.execute("INSERT INTO pagamentos (id, cliente, valor, data_criacao, data_confirmacao) VALUES (?, ?, ?, ?, ?)",
                   (transacao_id, 'Cliente', PRECO_PALPITE, datetime.now(), datetime.now()))
+        print("Pagamento registrado no banco")
         
         # Gerar números premium
         numeros_premium = gerar_numeros_premium()
         numeros_str = ','.join(str(n) for n in numeros_premium)
+        print(f"Números premium gerados: {numeros_premium}")
         
         # Criar palpite premium
         palpite_id = str(uuid.uuid4())
@@ -117,12 +124,14 @@ def gerar_palpite_premium():
         
         conn.commit()
         conn.close()
+        print("Palpite salvo no banco")
         
-        # Limpar sessão
+        # Atualizar sessão
         session['palpite_gerado'] = True
         session['palpite_id'] = palpite_id
         session['palpite_pago'] = True
         session['aguardando_pagamento'] = False
+        print("Sessão atualizada")
         
         return jsonify({
             'status': 'success', 
@@ -132,8 +141,8 @@ def gerar_palpite_premium():
         })
         
     except Exception as e:
-        print(f"Erro em gerar-palpite-premium: {e}")
-        return jsonify({'status': 'error', 'message': 'Erro ao gerar palpite premium'}), 500
+        print(f"Erro em gerar-palpite-premium: {str(e)}")
+        return jsonify({'status': 'error', 'message': f'Erro ao gerar palpite premium: {str(e)}'}), 500
 
 @app.route('/limpar-sessao', methods=['POST'])
 def limpar_sessao():
@@ -154,4 +163,4 @@ def catch_all(path):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=True)
