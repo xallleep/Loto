@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palpiteiro Premium - Lotofácil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0066cc;
+            --secondary: #009900;
+            --accent: #ff6600;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0066cc 0%, #009900 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-left: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 32px;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--accent);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            color: white;
+        }
+        
+        .hero h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .btn:hover {
+            background-color: #e55a00;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-small {
+            padding: 8px 20px;
+            font-size: 16px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .how-it-works {
+            padding: 60px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 36px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .step-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+        
+        .step h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .generator {
+            padding: 60px 0;
+            text-align: center;
+        }
+        
+        .generator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .bet-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .payment-info {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .price-tag {
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+        
+        .testimonials {
+            padding: 60px 0;
+            background: white;
+        }
+        
+        .testimonial-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .testimonial-card {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: var(--light);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin-right: 15px;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+        
+        .footer-bottom {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #555;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .purchase-count {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-left: 15px;
+        }
+        
+        .payment-instructions {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .restricted-content {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .pricing-advantage {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        
+        .limited-offer {
+            background: var(--accent);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+            }
+            
+            .hero h2 {
+                font-size: 32px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .steps {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-dice"></i></div>
+                    <h1>Palpiteiro Premium</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#how-it-works">Como Funciona</a></li>
+                        <li><a href="#generator">Gerar Palpites</a></li>
+                        <li><a href="#testimonials">Depoimentos</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Palpites Assertivos para Lotofácil</h2>
+            <p>Algoritmo inteligente que aumenta suas chances de ganhar na Lotofácil com base em estatísticas e probabilidades reais.</p>
+            
+            <div class="pricing-advantage">
+                <div class="limited-offer">PREÇO PROMOCIONAL POR TEMPO LIMITADO</div>
+                <h3 style="color: white; margin: 10px 0;">Apenas <span style="font-size: 1.5em;">R$ 3,97</span> por palpite!</h3>
+                <p>Menos que um cafezinho para aumentar drasticamente suas chances!</p>
+            </div>
+            
+            <a href="#generator" class="btn">Gerar Palpites Agora</a>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Como Funciona</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Faça o Pagamento</h3>
+                    <p>Pague apenas R$ 3,97 por palpite através do PagBank.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Gere seu Palpite</h3>
+                    <p>Utilize nosso algoritmo avançado para gerar combinações com maior probabilidade.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Aumente suas Chances</h3>
+                    <p>Jogue com mais confiança e acompanhe seus resultados.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="generator" id="generator">
+        <div class="container">
+            <h2 class="section-title">Gerador de Palpites</h2>
+            <div class="generator-container">
+                <p>Clique no botão abaixo para pagar <strong>R$ 3,97</strong> e gerar seu palpite com maior probabilidade de acerto.</p>
+                <a href="#" class="btn" id="generate-button">Pagar e Gerar Palpite</a>
+                
+                <div class="restricted-content" id="restricted-content">
+                    <div class="payment-instructions">
+                        <p><strong>Para acessar os palpites, é necessário realizar o pagamento.</strong></p>
+                        <p>Após o pagamento, seus números da sorte serão disponibilizados automaticamente.</p>
+                    </div>
+                </div>
+                
+                <div class="bet-card" id="bet-result" style="display: none;">
+                    <h3>Seus Números da Sorte</h3>
+                    <div class="numbers" id="generated-numbers">
+                        <!-- Numbers will be inserted here by JavaScript -->
+                    </div>
+                    <p>Boas sorte! Lembre-se de jogar com responsabilidade.</p>
+                    <p><small>Você pode fechar esta página, seus números já estão salvos.</small></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">O que nossos clientes dizem</h2>
+            <div class="testimonial-cards">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Paguei apenas R$ 3,97 e acertei 13 números! O melhor custo-benefício que já vi!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">M</div>
+                        <div>
+                            <h4>Marcos Silva</h4>
+                            <p>Cliente desde 2022</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Por menos de 4 reais, aumentei minhas chances drasticamente. Vale cada centavo!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">A</div>
+                        <div>
+                            <h4>Ana Costa</h4>
+                            <p>Cliente desde 2023</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Não imaginava que por tão pouco poderia ter acesso a palpites tão bons. Recomendo!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">R</div>
+                        <div>
+                            <h4>Ricardo Almeida</h4>
+                            <p>Cliente desde 2023</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Incrível como por apenas R$ 3,97 consegui um palpite que me fez ganhar pela primeira vez!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">C</div>
+                        <div>
+                            <h4>Carla Mendes</h4>
+                            <p>Cliente desde 2023</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="payment-modal" id="payment-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <h2>Pagamento</h2>
+            <div class="payment-info">
+                <p>Para gerar seu palpite premium, faça o pagamento de:</p>
+                <div class="price-tag">R$ 3,97</div>
+                <p>Utilize o botão abaixo para pagar via PagBank:</p>
+                
+                <a href="https://pag.ae/7_YEMco9s" class="btn" id="pagbank-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Pagar via PagBank
+                </a>
+                
+                <div class="payment-instructions">
+                    <p><strong>Instruções:</strong></p>
+                    <ol>
+                        <li>Clique no botão acima para ser redirecionado ao PagBank</li>
+                        <li>Complete o pagamento de R$ 3,97</li>
+                        <li>Após a confirmação do pagamento, retorne a esta página</li>
+                        <li>Seu palpite será gerado automaticamente</li>
+                    </ol>
+                    <p><strong>Importante:</strong> Não feche esta janela até completar o pagamento.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        Pagamento processado com sucesso! Seu palpite foi gerado abaixo.
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Palpiteiro Premium</h3>
+                    <p>O sistema inteligente de palpites para Lotofácil que aumenta suas chances de ganhar.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contato</h3>
+                    <p>Email: contato@palpiteiropremium.com</p>
+                    <p>WhatsApp: (11) 99999-9999</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <p>Termos de Uso</p>
+                    <p>Política de Privacidade</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Palpiteiro Premium. Todos os direitos reservados.</p>
+                <p>Este site não é afiliado à Caixa Econômica Federal ou à Lotofácil.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const generateButton = document.getElementById('generate-button');
+        const betResult = document.getElementById('bet-result');
+        const generatedNumbers = document.getElementById('generated-numbers');
+        const paymentModal = document.getElementById('payment-modal');
+        const closeModal = document.getElementById('close-modal');
+        const notification = document.getElementById('notification');
+        const restrictedContent = document.getElementById('restricted-content');
+        
+        // Check if user has already paid
+        const hasPaid = localStorage.getItem('lotofacilPaid');
+        
+        if (hasPaid) {
+            generateNumbers();
+        }
+        
+        // Event Listeners
+        generateButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            paymentModal.style.display = 'flex';
+            restrictedContent.style.display = 'block';
+        });
+        
+        closeModal.addEventListener('click', function() {
+            paymentModal.style.display = 'none';
+        });
+        
+        // Track external link clicks
+        document.getElementById('pagbank-link').addEventListener('click', function() {
+            alert('Você será redirecionado para o PagBank para completar o pagamento. Após o pagamento, retorne a esta página e seus números serão exibidos automaticamente.');
+            
+            // Simulate payment verification after a delay
+            // In a real scenario, this would be done with server-side verification
+            setTimeout(function() {
+                // This is just a simulation - in production, you need real payment verification
+                simulatePaymentVerification();
+            }, 5000);
+        });
+        
+        // Simulate payment verification (to be replaced with real verification)
+        function simulatePaymentVerification() {
+            // Simulate a successful payment
+            const paymentSuccessful = true; // This would come from your payment verification system
+            
+            if (paymentSuccessful) {
+                paymentModal.style.display = 'none';
+                showNotification();
+                generateNumbers();
+                
+                // Save payment status
+                localStorage.setItem('lotofacilPaid', 'true');
+            }
+        }
+        
+        // Mostrar notificação
+        function showNotification() {
+            notification.style.display = 'block';
+            
+            // Hide notification after 5 seconds
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Generate random numbers for Lotofácil
+        function generateNumbers() {
+            // Clear previous numbers
+            generatedNumbers.innerHTML = '';
+            
+            // Generate 15 unique random numbers between 1 and 25
+            const numbers = [];
+            while(numbers.length < 15) {
+                const num = Math.floor(Math.random() * 25) + 1;
+                if(!numbers.includes(num)) {
+                    numbers.push(num);
+                }
+            }
+            
+            // Sort numbers in ascending order
+            numbers.sort((a, b) => a - b);
+            
+            // Display numbers
+            numbers.forEach(num => {
+                const numberElement = document.createElement('div');
+                numberElement.classList.add('number');
+                numberElement.textContent = num;
+                generatedNumbers.appendChild(numberElement);
+            });
+            
+            // Show the bet result
+            betResult.style.display = 'block';
+            restrictedContent.style.display = 'none';
+            
+            // Scroll to results
+            betResult.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Close modal if clicked outside
+        window.addEventListener('click', function(e) {
+            if(e.target === paymentModal) {
+                paymentModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
