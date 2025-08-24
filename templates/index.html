@@ -6,7 +6,6 @@
     <title>Palpiteiro Premium - Lotofácil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* (O CSS permanece igual) */
         :root {
             --primary: #0066cc;
             --secondary: #009900;
@@ -238,6 +237,7 @@
             border-radius: 5px;
             display: none;
             z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .payment-instructions {
@@ -271,6 +271,14 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        .payment-countdown {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary);
         }
 
         @media (max-width: 768px) {
@@ -312,7 +320,7 @@
             
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
                 <h3 style="color: white; margin: 10px 0;">Apenas <span style="font-size: 1.5em;">R$ 3.99</span> por palpite!</h3>
-                <p>Menos que um cafezinho para aumentar drasticallyamente suas chances!</p>
+                <p>Menos que um cafezinho para aumentar drasticamente suas chances!</p>
             </div>
             
             <a href="#generator" class="btn">Gerar Palpites Premium</a>
@@ -367,10 +375,14 @@
                 <div class="pix-info">
                     <div class="pix-key">
                         <h4>Chave PIX (Copie e Cole):</h4>
-                        <p style="font-size: 16px; font-weight: bold;">19668d66-72cb-44cb-b7fc-fe3d1b8c559b</p>
+                        <p style="font-size: 16px; font-weight: bold;">lotofacil-palpites@email.com</p>
                         <button class="btn-copy" onclick="copiarChavePix()">
                             <i class="fas fa-copy"></i> Copiar Chave PIX
                         </button>
+                    </div>
+                    
+                    <div class="payment-countdown" id="countdown">
+                        Este código PIX é válido por: <span id="countdown-timer">05:00</span>
                     </div>
                     
                     <div class="warning-alert">
@@ -418,15 +430,21 @@
         const cancelPaymentButton = document.getElementById('cancel-payment');
         const betTitle = document.getElementById('bet-title');
         const betMessage = document.getElementById('bet-message');
+        const countdownTimer = document.getElementById('countdown-timer');
+        
+        // Variáveis de estado
+        let countdownInterval;
+        let paymentTimeLeft = 5 * 60; // 5 minutos em segundos
         
         // Event Listeners
         solicitarBtn.addEventListener('click', solicitarPagamento);
         confirmPaymentButton.addEventListener('click', gerarPalpitePremium);
         cancelPaymentButton.addEventListener('click', cancelarPagamento);
-        newBetButton.addEventListener('click', limparSessao);
+        newBetButton.addEventListener('click', reiniciarProcesso);
         
+        // Função para copiar a chave PIX
         function copiarChavePix() {
-            navigator.clipboard.writeText("19668d66-72cb-44cb-b7fc-fe3d1b8c559b")
+            navigator.clipboard.writeText("lotofacil-palpites@email.com")
                 .then(() => {
                     alert('Chave PIX copiada! Cole no seu app do banco para fazer o pagamento.');
                 })
@@ -436,120 +454,103 @@
                 });
         }
         
+        // Função para solicitar pagamento
         function solicitarPagamento() {
-            console.log("Solicitando pagamento...");
+            console.log("Iniciando processo de pagamento...");
             paymentProcessing.style.display = 'block';
             restrictedContent.style.display = 'none';
             solicitarBtn.disabled = true;
             
-            fetch('/solicitar-pagamento', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'  // Importante para cookies/sessão
-            })
-            .then(response => {
-                console.log("Resposta recebida do servidor:", response.status);
-                if (!response.ok) {
-                    throw new Error('Erro HTTP: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Dados recebidos:", data);
+            // Simular processamento
+            setTimeout(() => {
                 paymentProcessing.style.display = 'none';
+                pixPayment.style.display = 'block';
                 
-                if (data.status === 'success') {
-                    pixPayment.style.display = 'block';
-                    console.log("Pagamento solicitado com sucesso");
-                } else {
-                    alert('Erro: ' + (data.message || 'Tente novamente.'));
-                    restrictedContent.style.display = 'block';
-                    solicitarBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Erro completo:', error);
-                alert('Erro de conexão. Verifique o console (F12) para detalhes.');
-                paymentProcessing.style.display = 'none';
-                restrictedContent.style.display = 'block';
-                solicitarBtn.disabled = false;
-            });
+                // Iniciar contagem regressiva
+                startCountdown();
+                
+                console.log("Pagamento solicitado com sucesso");
+            }, 1500);
         }
         
+        // Iniciar contagem regressiva para o pagamento
+        function startCountdown() {
+            clearInterval(countdownInterval);
+            paymentTimeLeft = 5 * 60; // Reset para 5 minutos
+            
+            countdownInterval = setInterval(() => {
+                paymentTimeLeft--;
+                
+                if (paymentTimeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownTimer.textContent = "00:00";
+                    alert("Tempo para pagamento esgotado. Por favor, inicie o processo novamente.");
+                    cancelarPagamento();
+                    return;
+                }
+                
+                const minutes = Math.floor(paymentTimeLeft / 60);
+                const seconds = paymentTimeLeft % 60;
+                countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        // Gerar palpite premium
         function gerarPalpitePremium() {
-            console.log("Iniciando geração de palpite premium...");
+            console.log("Gerando palpite premium...");
             paymentProcessing.style.display = 'block';
             pixPayment.style.display = 'none';
             
-            fetch('/gerar-palpite-premium', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'  // Importante para cookies/sessão
-            })
-            .then(response => {
-                console.log("Resposta recebida:", response.status);
-                if (!response.ok) {
-                    throw new Error('Erro HTTP: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Dados recebidos:", data);
+            // Simular processamento
+            setTimeout(() => {
                 paymentProcessing.style.display = 'none';
                 
-                if (data.status === 'success') {
-                    displayNumbers(data.numeros, true);
-                    showNotification();
-                    console.log("Palpite premium gerado com sucesso!");
-                } else {
-                    alert('Erro: ' + (data.message || 'Tente novamente.'));
-                    pixPayment.style.display = 'block';
-                    console.error("Erro do servidor:", data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Erro completo:', error);
-                alert('Erro de conexão. Verifique o console (F12) para detalhes.');
-                paymentProcessing.style.display = 'none';
-                pixPayment.style.display = 'block';
-            });
+                // Gerar números aleatórios para a Lotofácil (15 números entre 1 e 25)
+                const numeros = gerarNumerosLotofacil();
+                
+                // Exibir os números
+                displayNumbers(numeros, true);
+                showNotification();
+                
+                // Parar a contagem regressiva
+                clearInterval(countdownInterval);
+                
+                console.log("Palpite premium gerado com sucesso!");
+            }, 2000);
         }
         
+        // Função para gerar números da Lotofácil
+        function gerarNumerosLotofacil() {
+            const numeros = [];
+            while (numeros.length < 15) {
+                const num = Math.floor(Math.random() * 25) + 1;
+                if (!numeros.includes(num)) {
+                    numeros.push(num);
+                }
+            }
+            return numeros.sort((a, b) => a - b);
+        }
+        
+        // Cancelar pagamento
         function cancelarPagamento() {
             console.log("Pagamento cancelado");
             pixPayment.style.display = 'none';
             restrictedContent.style.display = 'block';
             solicitarBtn.disabled = false;
+            
+            // Parar a contagem regressiva
+            clearInterval(countdownInterval);
         }
         
-        function limparSessao() {
-            console.log("Limpando sessão...");
-            fetch('/limpar-sessao', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Sessão limpa:", data);
-                betResult.style.display = 'none';
-                restrictedContent.style.display = 'block';
-                solicitarBtn.disabled = false;
-            })
-            .catch(error => {
-                console.error('Erro ao limpar sessão:', error);
-                betResult.style.display = 'none';
-                restrictedContent.style.display = 'block';
-                solicitarBtn.disabled = false;
-            });
+        // Reiniciar processo
+        function reiniciarProcesso() {
+            console.log("Reiniciando processo...");
+            betResult.style.display = 'none';
+            restrictedContent.style.display = 'block';
+            solicitarBtn.disabled = false;
         }
         
+        // Mostrar notificação
         function showNotification() {
             notification.style.display = 'block';
             setTimeout(() => {
@@ -557,12 +558,16 @@
             }, 5000);
         }
         
+        // Exibir números na interface
         function displayNumbers(numbers, isPremium) {
             generatedNumbers.innerHTML = '';
             
             numbers.forEach(num => {
                 const numberElement = document.createElement('div');
-                numberElement.classList.add('number', 'premium-number');
+                numberElement.classList.add('number');
+                if (isPremium) {
+                    numberElement.classList.add('premium-number');
+                }
                 numberElement.textContent = num;
                 generatedNumbers.appendChild(numberElement);
             });
@@ -572,8 +577,13 @@
             
             betResult.style.display = 'block';
             restrictedContent.style.display = 'none';
+            
+            // Rolagem suave para o resultado
             betResult.scrollIntoView({ behavior: 'smooth' });
         }
+        
+        // Inicialização
+        console.log("Sistema Palpiteiro Premium inicializado");
     </script>
 </body>
 </html>
